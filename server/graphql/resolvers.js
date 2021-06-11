@@ -110,18 +110,20 @@ module.exports = {
     };
   },
 
-  posts: async function (args, req) {
+  posts: async function ({ page }, req) {
     if (!req.isAuth) {
       const error = new Error("Not authenticated!");
       error.code = 401;
       throw error;
     }
-    // const currentPage = req.query.page || 1;
-    // const perPage = 2;
+    const currentPage = page || 1;
+    const perPage = 2;
     const totalItems = await Post.find().countDocuments();
-    const posts = await Post.find().populate("creator").sort({ createdAt: -1 });
-    // .skip((currentPage - 1) * perPage)
-    // .limit(perPage);
+    const posts = await Post.find()
+      .populate("creator")
+      .sort({ createdAt: -1 })
+      .skip((currentPage - 1) * perPage)
+      .limit(perPage);
 
     return {
       posts: posts.map((p) => {
