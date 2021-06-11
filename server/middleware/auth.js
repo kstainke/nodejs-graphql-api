@@ -1,6 +1,11 @@
 const jwt = require("jsonwebtoken");
 
 module.exports = (req, res, next) => {
+  const authHeader = req.get("Authorization");
+  if (!authHeader) {
+    req.isAuth = false;
+    return next();
+  }
   const token = req.get("Authorization").split(" ")[1];
   let decodedToken;
   try {
@@ -9,14 +14,15 @@ module.exports = (req, res, next) => {
       "N%YaF9t2qF$iPGG8KACOljr%uYReQFW!Ug@vzSM8&LNOq1wYu%"
     );
   } catch (err) {
-    err.statusCode = 500;
-    throw err;
+    req.isAuth = false;
+    return next();
   }
   if (!decodedToken) {
     const error = new Error("Not authenticated.");
-    error.statusCode = 401;
-    throw error;
+    req.isAuth = false;
+    return next();
   }
   req.userId = decodedToken.userId;
+  req.isAuth = true;
   next();
 };
