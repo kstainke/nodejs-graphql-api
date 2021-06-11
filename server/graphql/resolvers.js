@@ -155,4 +155,28 @@ module.exports = {
       updatedAt: post.updatedAt.toISOString(),
     };
   },
+
+  userStatus: async function (args, req) {
+    if (!req.isAuth) {
+      const error = new Error("Not authenticated!");
+      error.code = 401;
+      throw error;
+    }
+    const userId = req.userId;
+    const user = await User.findById(userId);
+    return { ...user._doc };
+  },
+
+  setUserStatus: async function ({ newStatus }, req) {
+    if (!req.isAuth) {
+      const error = new Error("Not authenticated!");
+      error.code = 401;
+      throw error;
+    }
+    const userId = req.userId;
+    const user = await User.findById(userId);
+    user.status = newStatus;
+    await user.save();
+    return { ...user._doc };
+  },
 };
